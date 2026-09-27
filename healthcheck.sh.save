@@ -10,7 +10,7 @@ set -u             # exit on undefined variable
 set -o pipefail    # catch failures in piped commands
 
 # --- Configuration ---
-SERVICES=("NetworkManager" "firewalld")   # systemd services to check
+SERVICES=("ssh" "docker")        # systemd services to check
 PORTS=(22 8000)                  # ports to check for listeners
 
 # --- Disk check ---
@@ -27,40 +27,21 @@ check_memory() {
     echo
 }
 
-# --- Service check ---
-check_services() {
-    echo "=== Service Status ==="
-    for svc in "${SERVICES[@]}"; do
-        if systemctl is-active --quiet "$svc"; then
-            echo "$svc: RUNNING"
-        else
-            echo "$svc: NOT RUNNING"
-        fi
-    done
-    echo
-}
-
-# --- Port check ---
-check_ports() {
-    echo "=== Port Status ==="
-    for port in "${PORTS[@]}"; do
-        if ss -ltn | grep -q ":$port "; then
-            echo "port $port: LISTENING"
-        else
-            echo "port $port: NOT LISTENING"
-        fi
-    done
-    echo
-}
-
 main() {
     echo "Health check started: $(date)"
     echo
     check_disk
     check_memory
-    check_services
-    check_ports
     echo "Health check finished: $(date)"
 }
 
 main
+x
+clear
+
+
+
+X
+
+
+
