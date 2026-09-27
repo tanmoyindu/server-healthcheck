@@ -13,6 +13,10 @@ set -o pipefail    # catch failures in piped commands
 SERVICES=("NetworkManager" "firewalld")   # systemd services to check
 PORTS=(22 8000)                  # ports to check for listeners
 
+LOG_DIR="./logs"                 # where log files are stored
+LOG_RETENTION_DAYS=7             # delete logs older than this
+LOG_FILE="$LOG_DIR/healthcheck_$(date +%Y%m%d_%H%M%S).log"
+
 # --- Disk check ---
 check_disk() {
     echo "=== Disk Usage ==="
@@ -53,14 +57,27 @@ check_ports() {
     echo
 }
 
-main() {
-    echo "Health check started: $(date)"
+# --- Cleanup old logs ---
+cleanup_logs() {
+    echo "=== Log Cleanup ==="
+    local deleted
+    deleted=$(find "$LOG_DIR" -name "healthcheck_*.log" -mtime +"$LOG_RETENTION_DAYS" -print -delete | wc -l)
+    echo "Deleted $deleted log(s) older than $LOG_RETENTION_DAYS days"
     echo
-    check_disk
-    check_memory
-    check_services
-    check_ports
-    echo "Health check finished: $(date)"
+}
+
+main() {
+    mkdir -p "$LOG_DIR"
+    {
+        echo "Health check started: $(date)"
+        echo
+        check_disk
+        check_memory
+        check_services
+        check_ports
+        cleanup_logs
+        echo "Health check finished: $(date)"
+    } | tee "$LOG_FILE"
 }
 
 main
